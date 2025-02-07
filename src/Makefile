@@ -12,10 +12,10 @@ LIBS=
 OUTFILE_DEBUG=../bin/capymq_debug
 OUTFILE_RELEASE=../bin/capymq
 
-_DEPS = conn.h reqproto.h
+_DEPS = conn.h reqproto.h mqueue.h broker.h utils.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o conn.o reqproto.o
+_OBJ = main.o conn.o reqproto.o mqueue.o broker.o utils.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 

@@ -3,6 +3,9 @@
     "stdio.h": "c",
     "stdlib.h": "c",
     "conn.h": "c",
-    "socket.h": "c"
+    "socket.h": "c",
+    "mqueue.h": "c",
+    "utils.h": "c",
+    "broker.h": "c"
   }
 }

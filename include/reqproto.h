@@ -1,3 +1,7 @@
+#pragma once
+
+#include "../include/mqueue.h"
+
 // Constants
 
 // 64KB recv buffer
@@ -24,4 +28,4 @@ typedef struct {
 } IncomingRequest;
 
 // Functions
-int handle_incoming_message(int client_socket, char *buffer);
+int handle_incoming_message(int client_socket, struct QueueHead *queue, char *buffer);

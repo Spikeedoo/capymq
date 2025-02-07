@@ -1,26 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
 
+#include "../include/utils.h"
 #include "../include/conn.h"
+#include "../include/mqueue.h"
+#include "../include/broker.h"
 
 // Defaults
 #define DEFAULT_PORT 3000
 #define DEFAULT_BACKLOG_SIZE 32
-
-// Util to validate port argv input type
-int is_int(char str[]) {
-  for (int i = 0; str[i] != 0; i++) {
-    if (!isdigit(str[i])) {
-      return 0;
-    }
-  }
-  return 1;
-}
 
 int main(int argc, char *argv[]) {
   // Default port
@@ -63,6 +55,18 @@ int main(int argc, char *argv[]) {
   printf("[CapyMQ] Powering on...\n");
   printf("[CapyMQ] Listening for connections on port %d...\n", port);
 
+  struct QueueHead *queue = initialize_message_queue();
+
+  pthread_t broker_thread_id;
+  if (pthread_create(&broker_thread_id, NULL, handle_broker_loop, &queue) < 0) {
+    perror("[CapyMQ::ERROR] Failed to start broker thread. Quitting...\n");
+    free(queue);
+    return 1;
+  }
+
+  // Detach broker thread so it cleans itself up
+  pthread_detach(broker_thread_id);
+
   // Main connection loop
   while (1) {
     // Client address data structures
@@ -78,18 +82,24 @@ int main(int argc, char *argv[]) {
 
     printf("[CapyMQ] Client connected...passing to thread\n");
 
+    // Initialize connection struct
+    IncomingConnection incoming_connection;
+    incoming_connection.client_socket = client_socket;
+    incoming_connection.queue = queue;
+
     // Spawn a new thread to handle this new connection
-    pthread_t thread_id;
-    if (pthread_create(&thread_id, NULL, accept_connection, &client_socket) < 0) {
+    pthread_t conn_thread_id;
+    if (pthread_create(&conn_thread_id, NULL, accept_connection, &incoming_connection) < 0) {
       perror("[CapyMQ::ERROR] Failed to pass client socket to thread--closing client socket...\n");
       close(client_socket);
       continue;
     }
 
     // Detach so thread cleans itself up
-    pthread_detach(thread_id);
+    pthread_detach(conn_thread_id);
   }
   
+  free(queue);
   close(server_socket);
 
   return 0;

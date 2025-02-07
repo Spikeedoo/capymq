@@ -2,16 +2,23 @@
 #include <sys/socket.h>
 
 #include "../include/reqproto.h"
+#include "../include/mqueue.h"
 
 // Specific handlers
-void handle_publish_request(int client_socket, IncomingRequest req) {}
-void handle_subscribe_request(int client_socket, IncomingRequest req) {}
-void handle_create_request(int client_socket, IncomingRequest req) {}
-void handle_delete_request(int client_socket, IncomingRequest req) {}
-void handle_close_request(int client_socket, IncomingRequest req) {}
+void handle_publish_request(int client_socket, struct QueueHead *queue, IncomingRequest req) {
+  printf("Publish request! Adding data...\n");
+  struct MessageEntry *me = malloc(sizeof(struct MessageEntry));
+  me->msg = req.payload;
+
+  add_queue_message_t(queue, me);
+}
+void handle_subscribe_request(int client_socket, struct QueueHead *queue, IncomingRequest req) {}
+void handle_create_request(int client_socket, struct QueueHead *queue, IncomingRequest req) {}
+void handle_delete_request(int client_socket, struct QueueHead *queue, IncomingRequest req) {}
+void handle_close_request(int client_socket, struct QueueHead *queue, IncomingRequest req) {}
 
 // Incoming request protocol processor
-int handle_incoming_message(int client_socket, char *buffer) {
+int handle_incoming_message(int client_socket, struct QueueHead *queue, char *buffer) {
   // Total bytes tracker
   int total_bytes_received = 0;
 
@@ -21,7 +28,7 @@ int handle_incoming_message(int client_socket, char *buffer) {
   total_bytes_received += bytes_received;
 
   REQUEST_TYPE request_type;
-  void (*request_handler_ptr)();
+  void (*request_handler_ptr)(int client_socket, struct QueueHead *queue, IncomingRequest req);
 
   // Store request type and pointer to handler
   switch (buffer[0]) {
@@ -74,7 +81,7 @@ int handle_incoming_message(int client_socket, char *buffer) {
   req.payload = buffer;
 
   // Call specific handler
-  request_handler_ptr(client_socket, req);
+  request_handler_ptr(client_socket, queue, req);
   
   return total_bytes_received;
 }

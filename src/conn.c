@@ -4,10 +4,13 @@
 #include <unistd.h>
 
 #include "../include/reqproto.h"
+#include "../include/conn.h"
 
 void* accept_connection(void *arg) {
   // Parse pthread argument pointer
-  int client_socket = *(int *) arg;
+  IncomingConnection incoming_connection = *(IncomingConnection *) arg;
+  int client_socket = incoming_connection.client_socket;
+  struct QueueHead *queue = incoming_connection.queue;
 
   printf("[CapyMQ] Picked up client socket %d on new thread...\n", client_socket);
 
@@ -16,7 +19,7 @@ void* accept_connection(void *arg) {
   int bytes_received;
 
   while (1) {
-    bytes_received = handle_incoming_message(client_socket, &buffer[0]);
+    bytes_received = handle_incoming_message(client_socket, queue, &buffer[0]);
 
     // Handle recv error
     if (bytes_received < 0) {
