@@ -83,14 +83,15 @@ int main(int argc, char *argv[]) {
     printf("[CapyMQ] Client connected...passing to thread\n");
 
     // Initialize connection struct
-    IncomingConnection incoming_connection;
-    incoming_connection.client_socket = client_socket;
-    incoming_connection.queue = queue;
+    IncomingConnection *incoming_connection = malloc(sizeof(IncomingConnection));
+    incoming_connection->client_socket = client_socket;
+    incoming_connection->queue = queue;
 
     // Spawn a new thread to handle this new connection
     pthread_t conn_thread_id;
-    if (pthread_create(&conn_thread_id, NULL, accept_connection, &incoming_connection) < 0) {
+    if (pthread_create(&conn_thread_id, NULL, accept_connection, incoming_connection) < 0) {
       perror("[CapyMQ::ERROR] Failed to pass client socket to thread--closing client socket...\n");
+      free(incoming_connection);
       close(client_socket);
       continue;
     }

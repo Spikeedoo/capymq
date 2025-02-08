@@ -1,7 +1,7 @@
 IDIR =../include
 CC=gcc
 CFLAGS_BASE=-I$(IDIR)
-CFLAGS_DEBUG = $(CFLAGS_BASE) -g -O0 # Debug symbols, no optimization
+CFLAGS_DEBUG = $(CFLAGS_BASE) -fsanitize=address -g -O0 # Debug symbols, no optimization
 CFLAGS_RELEASE = $(CFLAGS_BASE) -O2 # Optimized for performance
 
 ODIR=obj

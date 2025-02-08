@@ -34,6 +34,7 @@ void* accept_connection(void *arg) {
     }
   }
 
+  free(arg);
   close(client_socket);
   return NULL;
 }
