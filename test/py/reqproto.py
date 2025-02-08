@@ -5,7 +5,7 @@ def send_req(s, msg):
   s.send((1).to_bytes(1, 'big'))
 
   # input("press enter to send payload size...") # 1024 size
-  s.send((1024).to_bytes(2, 'big'))
+  s.send((len(msg)).to_bytes(2, 'big'))
 
   # input("press enter to send hello world...") # send hello world
   s.send(msg.encode('ascii'))
