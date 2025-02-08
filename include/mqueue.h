@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdlib.h>
 #include <sys/queue.h>
 
 // Structs
